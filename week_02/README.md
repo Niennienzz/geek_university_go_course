@@ -56,7 +56,7 @@ import (
 	"fmt"
 )
 
-// 使用 Go 1.13 的 `fmt.Errorf` 做简单的封装
+// 使用 Go 1.13 的 fmt.Errorf 做简单封装
 //
 // 这样的话，基本和 sql 包保持兼容，但是可以包含一些额外信息
 // 当调用者需要处理错误的时候，有多方方式：
@@ -83,23 +83,24 @@ import (
 	"log"
 )
 
+// Model
 type User struct {
 	ID      int
 	Email   string
 	Name    string
 }
 
-// 这个接口最贴近 DAO 层。
+// 这个接口最贴近 DAO 层
 type UserRepo interface {
 	GetUserByID(id int) (*User, error)
 }
 
-// 业务层逻辑。
+// 业务层逻辑
 type SomeBusinessService struct {
 	userRepo UserRepo
 }
 
-// 业务层逻辑。
+// 业务层逻辑
 func (srv *SomeBusinessService) ReadUserAndDoSomething(id int) error {
 	user, err := srv.userRepo.GetUserByID(id)
 	if errors.Is(err, sql.ErrNoRows) {                  // 用 errors.Is 判断是否为 sql.ErrNoRows 
@@ -109,7 +110,7 @@ func (srv *SomeBusinessService) ReadUserAndDoSomething(id int) error {
 		return errors.Wrap(err, "generic error")    // 业务层用 Wrap 封装 - 此时是其他的错误
 	} 
 
-	// 假设后面还有大量的业务逻辑。 
+	// 假设后面还有大量的业务层逻辑
 	//... 
 	log.Printf("%+v\n", user)
 	return nil
