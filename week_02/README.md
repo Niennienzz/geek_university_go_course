@@ -18,7 +18,7 @@
 - 那么 `sqlx` 本来就应该与 `sql` 高度耦合，甚至直接兼容 `sql` 的许多 API.
 - 在这种情况下，我认为 `sqlx` 的错误处理用以下两种方式都可以：
   - 直接保留 `sql` 的预定义错误并返回。
-  - 使用 Go 1.13 的 `fmt.Errorf` 做简单的封装。
+  - 使用 Go 1.13 的 `fmt.Errorf("... %w", err)` 做简单封装。
 
 ```go
 package sqlx
@@ -44,10 +44,7 @@ type Rows struct {
 // 虽然拓展了 sql 包中的 DB 和 Rows 类型，但因为依然和 sql 包高度耦合，所以可以沿用它的预定义错误
 func (db *DB) Queryx(query string, args ...interface{}) (*Rows, error) {
 	rs, err := db.DB.Query(query, args...)
-	if err != nil {
-		return nil, err
-	}
-	return &Rows{rs, db.someMoreInfo}, nil
+	return &Rows{rs, db.someMoreInfo}, err     // 直接返回，调用者不能对结果有任何假设，必须先处理错误
 }
 ```
 
@@ -90,24 +87,26 @@ type User struct {
 	ID      int
 	Email   string
 	Name    string
-	Friends []User
 }
 
+// 这个接口最贴近 DAO 层。
 type UserRepo interface {
 	GetUserByID(id int) (*User, error)
 }
 
+// 业务层逻辑。
 type SomeBusinessService struct {
 	userRepo UserRepo
 }
 
+// 业务层逻辑。
 func (srv *SomeBusinessService) ReadUserAndDoSomething(id int) error {
 	user, err := srv.userRepo.GetUserByID(id)
-	if errors.Is(err, sql.ErrNoRows) {
-		return errors.Wrap(err, "user not found")
+	if errors.Is(err, sql.ErrNoRows) {                  // 用 errors.Is 判断是否为 sql.ErrNoRows 
+		return errors.Wrap(err, "user not found")   // 业务层用 Wrap 封装 - 我们知道是找不到用户
 	}
 	if err != nil {
-		return errors.Wrap(err, "unknown error")
+		return errors.Wrap(err, "generic error")    // 业务层用 Wrap 封装 - 此时是其他的错误
 	} 
 
 	// 假设后面还有大量的业务逻辑。 
@@ -115,15 +114,15 @@ func (srv *SomeBusinessService) ReadUserAndDoSomething(id int) error {
 	log.Printf("%+v\n", user)
 	return nil
 }
-
 ```
 
 ## 3 - 结论
 
-### 那么 DAO 到底属于哪个层级？
+- 那么 DAO 到底更贴近哪个层级？具体情况具体分析。
 
-- 具体情况具体分析。
-- 假设这个 DAO 层功能比较复杂，含有一定的业务逻辑，**属于业务层级**，那么当出现 `sql.ErrNoRows` 的时候可以封装，甚至不处理。
+### 贴近业务
+
+- 假设这个 DAO 层功能比较复杂，含有一定的业务逻辑，更贴近业务层级，那么当出现 `sql.ErrNoRows` 的时候可以封装，甚至不处理。
   - 例如这个 DAO 是一个 ORM 形式的，它可以提前加载（Eager Load）一个用户的信用卡列表。
   - 那么当这个用户还没有添加信用卡的时候，数据库层某一时刻会出现 `sql.ErrNoRows`，但 ORM 不一定要报错。
 
@@ -138,10 +137,14 @@ type User struct {
 	gorm.Model
 	Email       string       `gorm:"column:email"`
 	Name        string       `gorm:"column:name"`
-	CreditCards []CreditCard `gorm:"foreignKey:user_id"` // No Rows -> 返回空列表即可
+	CreditCards []CreditCard `gorm:"foreignKey:user_id"` // sql.ErrNoRows -> 返回空列表即可
 }
 ```
 
-- **个人认为，更多时候 DAO 层功能应该还是比较简单，是对 `sql` 层的一个简单拓展，属于基础层级，那么根据上面的分析：**
-  - 直接返回 `sql.ErrNoRows` 预定义错误，
-  - 或使用 `fmt.Errof` 进行简单的封装。
+### 贴近基础
+
+- 个人认为，更多时候 DAO 层功能应该还是比较简单，是对 `sql` 层的一个拓展 + 对 `model` 的引入。
+- 它应该最贴近上面第二部分例子中的 `UserRepo` 接口，介于业务层级和基础层级之间，**但更贴近基础层级**。
+- **根据以上分析，当 DAO 层里遇到 `sql.ErrNoRows` 的时候，以下两种方式都可以：**
+  - **直接将它返回。**
+  - **或使用 Go 1.13 的 `fmt.Errorf("... %w", err)` 做简单封装。**
