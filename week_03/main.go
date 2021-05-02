@@ -82,6 +82,9 @@ func main() {
 //  - 如果收到 ctx.Done 中的消息，则证明同一个 errgroup.Group 的其他成员出错了，让自己优雅关闭
 //  - 反之，如果自己出错需要关闭，则通过返回错误来通知 errgroup.Group 里的其他成员
 
+// Server 监听 ctx.Done
+// 若 ctx 取消则自己也取消
+// 若自己出错，则通过返回错误来通知其他成员
 type Server struct {
 	server http.Server
 	label  string
@@ -97,9 +100,6 @@ func NewServer(label, addr string, handler http.Handler) *Server {
 	}
 }
 
-// Server 监听 ctx.Done
-// 若 ctx 取消则自己也取消
-// 若自己出错，则通过返回错误来通知其他成员
 func (s *Server) Run(ctx context.Context) error {
 	ch := make(chan error)
 
