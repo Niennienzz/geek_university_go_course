@@ -1,0 +1,88 @@
+syntax = "proto3";
+
+package catalog.v1;
+
+import "google/api/annotations.proto";
+
+option go_package = "catalog/api/catalog/v1;v1";
+option java_multiple_files = true;
+option java_package = "dev.kratos.api.catalog.v1";
+option java_outer_classname = "HelloWorldProtoV1";
+
+service CatalogService {
+  rpc CreateProduct (CreateProductRequest) returns (CreateProductReply) {
+    option (google.api.http) = {
+      post: "/v1/product/"
+      body: "*"
+    };
+  }
+  rpc UpdateProduct (UpdateProductRequest) returns (UpdateProductReply) {
+    option (google.api.http) = {
+      put: "/v1/product/{id}"
+      body: "*"
+    };
+  }
+  rpc DeleteProduct (DeleteProductRequest) returns (DeleteProductReply) {
+    option (google.api.http) = {
+      delete: "/v1/product/{id}"
+    };
+  }
+  rpc GetProduct (GetProductRequest) returns (GetProductReply) {
+    option (google.api.http) = {
+      get: "/v1/product/{id}"
+    };
+  }
+  rpc ListProduct (ListProductRequest) returns (ListProductReply) {
+    option (google.api.http) = {
+      get: "/v1/product/"
+    };
+  }
+}
+
+message Product {
+  int64 id = 1;
+  string name = 2;
+  string description = 3;
+  int64 price = 4;
+}
+
+message CreateProductRequest {
+  string name = 1;
+  string description = 2;
+  int64 price = 3;
+}
+
+message CreateProductReply {
+  Product value = 1;
+}
+
+message UpdateProductRequest {
+  string name = 1;
+  string description = 2;
+  int64 price = 3;
+}
+
+message UpdateProductReply {
+  Product value = 1;
+}
+
+message DeleteProductRequest {
+  int64 id = 1;
+}
+message DeleteProductReply {
+}
+
+message GetProductRequest {
+  int64 id = 1;
+}
+
+message GetProductReply {
+  Product value = 1;
+}
+
+message ListProductRequest {
+}
+
+message ListProductReply {
+  repeated Product values = 1;
+}
