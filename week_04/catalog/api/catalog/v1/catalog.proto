@@ -57,9 +57,10 @@ message CreateProductReply {
 }
 
 message UpdateProductRequest {
-  string name = 1;
-  string description = 2;
-  int64 price = 3;
+  int64 id = 1;
+  string name = 2;
+  string description = 3;
+  int64 price = 4;
 }
 
 message UpdateProductReply {

@@ -14,7 +14,6 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-// ProviderSet is data providers.
 var ProviderSet = wire.NewSet(NewData, NewProductRepo)
 
 type Data struct {
