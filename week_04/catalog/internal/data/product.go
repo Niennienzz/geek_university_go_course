@@ -16,7 +16,7 @@ type productRepo struct {
 func NewProductRepo(data *Data, logger log.Logger) biz.ProductRepo {
 	return &productRepo{
 		data: data,
-		log:  log.NewHelper("data/greeter", logger),
+		log:  log.NewHelper("data/product", logger),
 	}
 }
 

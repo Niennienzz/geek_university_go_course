@@ -11,7 +11,6 @@ import (
 	"catalog/internal/data"
 	"catalog/internal/server"
 	"catalog/internal/service"
-
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/log"
 )
@@ -24,11 +23,11 @@ func initApp(confServer *conf.Server, confData *conf.Data, logger log.Logger) (*
 	if err != nil {
 		return nil, nil, err
 	}
-	greeterRepo := data.NewProductRepo(dataData, logger)
-	greeterUsecase := biz.NewGreeterUseCase(greeterRepo, logger)
-	greeterService := service.NewGreeterService(greeterUsecase, logger)
-	httpServer := server.NewHTTPServer(confServer, greeterService, logger)
-	grpcServer := server.NewGRPCServer(confServer, greeterService, logger)
+	productRepo := data.NewProductRepo(dataData, logger)
+	productUseCase := biz.NewProductUseCase(productRepo, logger)
+	productService := service.NewProductService(productUseCase, logger)
+	httpServer := server.NewHTTPServer(confServer, productService, logger)
+	grpcServer := server.NewGRPCServer(confServer, productService, logger)
 	app := newApp(logger, httpServer, grpcServer)
 	return app, func() {
 		cleanup()

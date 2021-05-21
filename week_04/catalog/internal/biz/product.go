@@ -29,8 +29,8 @@ type ProductUseCase struct {
 	log  *log.Helper
 }
 
-func NewGreeterUseCase(repo ProductRepo, logger log.Logger) *ProductUseCase {
-	return &ProductUseCase{repo: repo, log: log.NewHelper("usecase/greeter", logger)}
+func NewProductUseCase(repo ProductRepo, logger log.Logger) *ProductUseCase {
+	return &ProductUseCase{repo: repo, log: log.NewHelper("usecase/product", logger)}
 }
 
 func (uc *ProductUseCase) Create(ctx context.Context, val *Product) error {

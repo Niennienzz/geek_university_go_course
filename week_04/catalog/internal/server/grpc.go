@@ -13,7 +13,7 @@ import (
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 )
 
-func NewGRPCServer(c *conf.Server, greeter *service.ProductService, logger log.Logger) *grpc.Server {
+func NewGRPCServer(c *conf.Server, productService *service.ProductService, logger log.Logger) *grpc.Server {
 	var opts = []grpc.ServerOption{
 		grpc.Middleware(
 			middleware.Chain(
@@ -33,6 +33,6 @@ func NewGRPCServer(c *conf.Server, greeter *service.ProductService, logger log.L
 		opts = append(opts, grpc.Timeout(c.Grpc.Timeout.AsDuration()))
 	}
 	srv := grpc.NewServer(opts...)
-	v1.RegisterCatalogServiceServer(srv, greeter)
+	v1.RegisterCatalogServiceServer(srv, productService)
 	return srv
 }

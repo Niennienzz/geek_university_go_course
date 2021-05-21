@@ -13,7 +13,7 @@ import (
 	"github.com/go-kratos/kratos/v2/transport/http"
 )
 
-func NewHTTPServer(c *conf.Server, greeter *service.ProductService, logger log.Logger) *http.Server {
+func NewHTTPServer(c *conf.Server, productService *service.ProductService, logger log.Logger) *http.Server {
 	var opts = []http.ServerOption{}
 	if c.Http.Network != "" {
 		opts = append(opts, http.Network(c.Http.Network))
@@ -32,6 +32,6 @@ func NewHTTPServer(c *conf.Server, greeter *service.ProductService, logger log.L
 			logging.Server(logger),
 		),
 	)
-	srv.HandlePrefix("/", v1.NewCatalogServiceHandler(greeter, m))
+	srv.HandlePrefix("/", v1.NewCatalogServiceHandler(productService, m))
 	return srv
 }

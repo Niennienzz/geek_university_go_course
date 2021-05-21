@@ -16,8 +16,8 @@ type ProductService struct {
 	log *log.Helper
 }
 
-func NewGreeterService(uc *biz.ProductUseCase, logger log.Logger) *ProductService {
-	return &ProductService{uc: uc, log: log.NewHelper("service/greeter", logger)}
+func NewProductService(uc *biz.ProductUseCase, logger log.Logger) *ProductService {
+	return &ProductService{uc: uc, log: log.NewHelper("service/product", logger)}
 }
 
 func (s *ProductService) CreateProduct(ctx context.Context, req *v1.CreateProductRequest) (*v1.CreateProductReply, error) {
